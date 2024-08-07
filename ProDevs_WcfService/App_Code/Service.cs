@@ -65,4 +65,54 @@ public class Service : IService
             return false; 
         }
     }
+
+
+
+
+
+    public List<Product> GetAllProducts()
+    {
+       
+
+        dynamic getProdcts = (from p in data.Products where p.Active == 1 select p).DefaultIfEmpty();
+
+
+        if (getProdcts != null)
+        {
+
+            List<Product> Products = new List<Product>();
+           
+            foreach (Product p in getProdcts)
+            {
+
+
+                Products.Add(p);
+            }
+
+            return Products;
+        }
+        else
+        {
+            return null;
+        }
+
+
+    }
+
+    public Product GetProduct(int id)
+    {
+        var product = (from p in data.Products  where p.Id == id select p).FirstOrDefault();
+
+        if (product != null)
+        {
+            var tempProd = product;
+
+            return tempProd;
+
+        }
+        else
+       
+            return null;
+    }
+
 }

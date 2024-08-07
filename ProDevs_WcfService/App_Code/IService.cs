@@ -17,6 +17,14 @@ public interface IService
 	[OperationContract]
 	
 	int Login(string email, string password);
+
+	[OperationContract]
+	List<Product> GetAllProducts();
+
+
+	[OperationContract]
+	Product GetProduct(int id);
+
 }
 
 
