@@ -41,6 +41,22 @@ public interface IService
 	[OperationContract]
 	bool DeleteProduct(int id);
 
+
+	[OperationContract]
+	bool AddToCart(int userId, int productId, int quantity);
+
+	[OperationContract]
+	bool RemoveFromCart(int userId, int productId);
+
+	[OperationContract]
+	bool UpdateCart(int userId, int productId, int quantity);
+
+	[OperationContract]
+	List<CartItem> GetCartItems(int userId);
+
+	[OperationContract]
+	Invoice Checkout(int userId);
+
 }
 
 

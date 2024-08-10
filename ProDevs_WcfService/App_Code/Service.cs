@@ -225,4 +225,125 @@ public class Service : IService
             return false;
         }
     }
+
+
+
+
+    public bool AddToCart(int userId, int productId, int quantity)
+    {
+        var cartItem = data.CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+
+        if (cartItem != null)
+        {
+            cartItem.Quantity += quantity;
+        }
+        else
+        {
+            cartItem = new CartItem
+            {
+                UserId = userId,
+                ProductId = productId,
+                Quantity = quantity
+            };
+            data.CartItems.InsertOnSubmit(cartItem);
+        }
+
+        try
+        {
+            data.SubmitChanges();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public bool RemoveFromCart(int userId, int productId)
+    {
+        var cartItem = data.CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+
+        if (cartItem != null)
+        {
+            data.CartItems.DeleteOnSubmit(cartItem);
+            try
+            {
+                data.SubmitChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public bool UpdateCart(int userId, int productId, int quantity)
+    {
+        var cartItem = data.CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+
+        if (cartItem != null)
+        {
+            cartItem.Quantity = quantity;
+
+            try
+            {
+                data.SubmitChanges();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public List<CartItem> GetCartItems(int userId)
+    {
+        return data.CartItems.Where(c => c.UserId == userId).ToList();
+    }
+
+    public Invoice Checkout(int userId)
+    {
+        var cartItems = GetCartItems(userId);
+
+        if (cartItems.Count > 0)
+        {
+            var invoice = new Invoice
+            {
+                UserId = userId,
+                Date = DateTime.Now,
+                TotalAmount = cartItems.Sum(c => c.Product.Price * c.Quantity)
+            };
+
+            data.Invoices.InsertOnSubmit(invoice);
+
+            foreach (var item in cartItems)
+            {
+                var invoiceItem = new InvoiceItem
+                {
+                    Id = invoice.Id,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    Price = item.Product.Price
+                };
+
+                data.InvoiceItems.InsertOnSubmit(invoiceItem);
+                data.CartItems.DeleteOnSubmit(item);
+            }
+
+            try
+            {
+                data.SubmitChanges();
+                return invoice;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        return null;
+    }
 }
