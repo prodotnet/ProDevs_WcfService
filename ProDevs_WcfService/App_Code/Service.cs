@@ -37,7 +37,7 @@ public class Service : IService
         var IsUserExit = data.UserRegistrations.FirstOrDefault(x => x.Email == email);
         if (IsUserExit != null)
         {
-            return false; // User already exists
+            return false; 
         }
 
         // Create a new user registration
@@ -70,8 +70,7 @@ public class Service : IService
     //Method to Add Product
     public bool AddProduct(Product product)
     {
-        try
-        {
+       
             
             var newProduct = new Product
             {
@@ -85,24 +84,32 @@ public class Service : IService
 
           
             data.Products.InsertOnSubmit(newProduct);
-            data.SubmitChanges();
+         
+           try
+           {
 
-            return true;
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
+              data.SubmitChanges();
+
+               return true;
+           }
+           catch (Exception ex)
+           {
+              return false;
+           }
     }
 
 
 
     public bool UpdateProduct(Product product)
     {
+
+        // Checking if the user already exists
+        var IsProductExit = data.Products.FirstOrDefault(p => p.Id == product.Id);
+
+
         try
         {
-            // Checking if the user already exists
-            var IsProductExit = data.Products.FirstOrDefault(p => p.Id == product.Id);
+            
             if (IsProductExit != null)
             {
                 IsProductExit.Name = product.Name;
@@ -174,7 +181,7 @@ public class Service : IService
 
   
 
-
+    //method to sort by catagory
     public List<Product> GetProductsByCategory(string category)
     {
         var products = data.Products.Where(p => p.Active == 1);
@@ -197,6 +204,8 @@ public class Service : IService
         return products.ToList();
     }
 
+
+    //a function to delete products
     public bool DeleteProduct(int id)
     {
         try
