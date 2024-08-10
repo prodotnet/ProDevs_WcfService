@@ -33,7 +33,7 @@ public class Service : IService
     {
         
 
-        // Check if the user already exists
+        // Checking if the user already exists
         var IsUserExit = data.UserRegistrations.FirstOrDefault(x => x.Email == email);
         if (IsUserExit != null)
         {
@@ -67,9 +67,82 @@ public class Service : IService
     }
 
 
+    //Method to Add Product
+    public bool AddProduct(Product product)
+    {
+        try
+        {
+            
+            var newProduct = new Product
+            {
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Category = product.Category,
+                ImageUrl_ = product.ImageUrl_,
+                Active = 1 
+            };
+
+          
+            data.Products.InsertOnSubmit(newProduct);
+            data.SubmitChanges();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    }
 
 
 
+    public bool UpdateProduct(Product product)
+    {
+        try
+        {
+            // Checking if the user already exists
+            var IsProductExit = data.Products.FirstOrDefault(p => p.Id == product.Id);
+            if (IsProductExit != null)
+            {
+                IsProductExit.Name = product.Name;
+                IsProductExit.Description = product.Description;
+                IsProductExit.Price = product.Price;
+                IsProductExit.Category = product.Category;
+                IsProductExit.ImageUrl_ = product.ImageUrl_;
+
+                data.SubmitChanges();
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+           
+            return false;
+        }
+    }
+
+    //Method  to get Product
+    public Product GetProduct(int id)
+    {
+        var product = (from p in data.Products where p.Id == id select p).FirstOrDefault();
+
+        if (product != null)
+        {
+            var tempProd = product;
+
+            return tempProd;
+
+        }
+        else
+
+            return null;
+    }
+
+
+
+    //Method  to get all  Products
     public List<Product> GetAllProducts()
     {
        
@@ -99,20 +172,48 @@ public class Service : IService
 
     }
 
-    public Product GetProduct(int id)
+  
+
+
+    public List<Product> GetProductsByCategory(string category)
     {
-        var product = (from p in data.Products  where p.Id == id select p).FirstOrDefault();
+        var products = data.Products.Where(p => p.Active == 1);
 
-        if (product != null)
+        switch (category.ToLower())
         {
-            var tempProd = product;
-
-            return tempProd;
-
+            case "smart watches":
+                products = products.Where(p => p.Category == "Smart Watches");
+                break;
+            case "rolex":
+                products = products.Where(p => p.Category == "Rolex");
+                break;
+            case "omega":
+                products = products.Where(p => p.Category == "Omega");
+                break;
+            default:
+                break;
         }
-        else
-       
-            return null;
+
+        return products.ToList();
     }
 
+    public bool DeleteProduct(int id)
+    {
+        try
+        {
+            var product = data.Products.FirstOrDefault(p => p.Id == id);
+            if (product != null)
+            {
+                data.Products.DeleteOnSubmit(product);
+                data.SubmitChanges();
+                return true;
+            }
+            return false;
+        }
+        catch (Exception ex)
+        {
+           
+            return false;
+        }
+    }
 }

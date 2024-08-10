@@ -18,12 +18,28 @@ public interface IService
 	
 	int Login(string email, string password);
 
+
+	[OperationContract]
+	bool AddProduct(Product product);
+
+
+	[OperationContract]
+	bool UpdateProduct(Product product);
+
+	[OperationContract]
+	Product GetProduct(int id);
+
+
 	[OperationContract]
 	List<Product> GetAllProducts();
 
 
 	[OperationContract]
-	Product GetProduct(int id);
+	List<Product> GetProductsByCategory(string category);
+
+
+	[OperationContract]
+	bool DeleteProduct(int id);
 
 }
 
