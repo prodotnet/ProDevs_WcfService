@@ -149,27 +149,35 @@ public class Service : IService
 
 
 
-    //Method  to get all  Products
+    //Method  to get all  Products dynamically 
     public List<Product> GetAllProducts()
     {
-       
+        dynamic Prods = new List<Product>();
 
-        dynamic getProdcts = (from p in data.Products where p.Active == 1 select p).DefaultIfEmpty();
+        dynamic tempProds = (from p in data.Products
+                             where p.Active == 1
+                             select p).DefaultIfEmpty();
 
-
-        if (getProdcts != null)
+        if (tempProds != null)
         {
-
-            List<Product> Products = new List<Product>();
-           
-            foreach (Product p in getProdcts)
+            foreach (Product p in tempProds)
             {
+                var AllProds = new Product
+                {
+                    Id = p.Id,
+                    Name = p.Name,                    
+                    Description = p.Description,
+                    ImageUrl_ = p.ImageUrl_,
+                    Price = p.Price,                  
+                    Category = p.Category,
+                    Active = 1,
 
+                };
 
-                Products.Add(p);
+                Prods.Add(AllProds);
             }
 
-            return Products;
+            return Prods;
         }
         else
         {
@@ -179,30 +187,110 @@ public class Service : IService
 
     }
 
-  
 
-    //method to sort by catagory
+
+    //method to sort by catagory by name
     public List<Product> GetProductsByCategory(string category)
     {
-        var products = data.Products.Where(p => p.Active == 1);
+        dynamic Prods = new List<Product>();
 
-        switch (category.ToLower())
+        // Get all active products
+        var tempProds = (from p in data.Products
+                         where p.Active == 1
+                         select p).DefaultIfEmpty();
+
+        // Check if tempProds is not null or empty
+        if (tempProds != null && tempProds.Any())
         {
-            case "smart watches":
-                products = products.Where(p => p.Category == "Smart Watches");
-                break;
-            case "rolex":
-                products = products.Where(p => p.Category == "Rolex");
-                break;
-            case "omega":
-                products = products.Where(p => p.Category == "Omega");
-                break;
-            default:
-                break;
-        }
+            foreach (Product p in tempProds)
+            {
+                // Filter products based on category
+                bool categoryMatches = false;
 
-        return products.ToList();
+                switch (category.ToLower())
+                {
+                    case "smart watches":
+                        categoryMatches = p.Category == "Smart Watches";
+                        break;
+                    case "rolex":
+                        categoryMatches = p.Category == "Rolex";
+                        break;
+                    case "omega":
+                        categoryMatches = p.Category == "Omega";
+                        break;
+                    default:
+                        categoryMatches = true; // Include all products if category is not specified
+                        break;
+                }
+
+                // Add to result list if category matches
+                if (categoryMatches)
+                {
+                    var AllProds = new Product
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        ImageUrl_ = p.ImageUrl_,
+                        Price = p.Price,
+                        Category = p.Category,
+                        Active = 1,
+                    };
+
+                    Prods.Add(AllProds);
+                }
+            }
+
+            return Prods;
+        }
+        else
+        {
+            return new List<Product>(); // Return an empty list instead of null
+        }
     }
+
+
+
+    public List<Product> GetProductsByPriceRange(decimal minPrice, decimal maxPrice)
+    {
+        dynamic Prods = new List<Product>();
+
+        // Get all active products
+        var tempProds = (from p in data.Products
+                         where p.Active == 1
+                         select p).DefaultIfEmpty();
+
+        // Check if tempProds is not null or empty
+        if (tempProds != null && tempProds.Any())
+        {
+            foreach (Product p in tempProds)
+            {
+                // Filter products based on price range
+                if (p.Price >= minPrice && p.Price <= maxPrice)
+                {
+                    var AllProds = new Product
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        ImageUrl_ = p.ImageUrl_,
+                        Price = p.Price,
+                        Category = p.Category,
+                        Active = 1,
+                    };
+
+                    Prods.Add(AllProds);
+                }
+            }
+
+            return Prods;
+        }
+        else
+        {
+            return new List<Product>(); // Return an empty list instead of null
+        }
+    }
+
 
 
     //a function to delete products

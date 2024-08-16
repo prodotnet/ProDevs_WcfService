@@ -38,6 +38,11 @@ public interface IService
 	List<Product> GetProductsByCategory(string category);
 
 
+
+	[OperationContract]
+	List<Product> GetProductsByPriceRange(decimal minPrice, decimal maxPrice);
+
+
 	[OperationContract]
 	bool DeleteProduct(int id);
 
