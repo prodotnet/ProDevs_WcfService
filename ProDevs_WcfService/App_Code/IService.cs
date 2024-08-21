@@ -16,7 +16,7 @@ public interface IService
 
 	[OperationContract]
 	
-	int Login(string email, string password);
+	UserRegistration Login(string email, string password);
 
 
 	[OperationContract]
@@ -50,6 +50,8 @@ public interface IService
 	[OperationContract]
 	bool AddToCart(int userId, int productId, int quantity);
 
+	[OperationContract]
+	int GetCartItemCount(int userId);
 	[OperationContract]
 	bool RemoveFromCart(int userId, int productId);
 

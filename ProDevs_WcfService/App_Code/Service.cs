@@ -11,20 +11,31 @@ public class Service : IService
 {
     DataClassesDataContext data = new DataClassesDataContext();
 
-    public int Login(string email, string password)
+    public  UserRegistration Login(string email, string password)
     {
 
         var login = (from s in data.UserRegistrations where s.Email.Equals(email) && s.Password.Equals(password) select s).FirstOrDefault();
 
         if (login != null)
         {
-            return login.Id;
+
+            var User = new UserRegistration
+            {
+                Id = login.Id,
+                FirstName = login.FirstName,
+                LastName = login.LastName,
+                Email = login.Email,
+                UserType = login.UserType,
+            
+            };
+
+            return User;
 
         }
         else
         {
 
-            return 0;
+            return  null;
         }
     }
 
@@ -133,14 +144,23 @@ public class Service : IService
     //Method  to get Product
     public Product GetProduct(int id)
     {
-        var product = (from p in data.Products where p.Id == id select p).FirstOrDefault();
+        var get = (from p in data.Products where p.Id.Equals(id) && p.Active.Equals(1) select p).FirstOrDefault();
 
-        if (product != null)
+        if (get != null)
         {
-            var tempProd = product;
+            var Prod = new Product
+            {
+                Id = get.Id,
+                Name = get.Name,
+                Description = get.Description,
+                ImageUrl_ = get.ImageUrl_,
+                Price = get.Price,
 
-            return tempProd;
 
+            };
+
+
+            return Prod;
         }
         else
 
@@ -347,6 +367,25 @@ public class Service : IService
         }
     }
 
+
+    //a method to count cart items
+    public int GetCartItemCount(int userId)
+    {
+        try
+        {
+            
+            int itemCount = data.CartItems.Count(c => c.UserId == userId);
+            return itemCount;
+        }
+        catch (Exception ex)
+        {
+          
+            return 0; 
+        }
+    }
+
+
+
     public bool RemoveFromCart(int userId, int productId)
     {
         var cartItem = data.CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
@@ -390,8 +429,34 @@ public class Service : IService
 
     public List<CartItem> GetCartItems(int userId)
     {
-        return data.CartItems.Where(c => c.UserId == userId).ToList();
+        List<CartItem> userCartItems = new List<CartItem>();
+
+        // Fetch all cart items from the database
+        var allCartItems = data.CartItems.ToList();
+
+      
+        foreach (var cartItem in allCartItems)
+        {
+            if (cartItem.UserId == userId)
+            {
+                // Create a new CartItem instance and add it to the list
+                var item = new CartItem
+                {
+                    UserId = cartItem.UserId,
+                    ProductId = cartItem.ProductId,
+                    Quantity = cartItem.Quantity,
+                  
+                    Product = cartItem.Product 
+                };
+
+                userCartItems.Add(item);
+            }
+        }
+
+        return userCartItems;
     }
+
+
 
     public Invoice Checkout(int userId)
     {
