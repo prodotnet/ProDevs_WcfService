@@ -214,12 +214,12 @@ public class Service : IService
     {
         dynamic Prods = new List<Product>();
 
-        // Get all active products
+      
         var tempProds = (from p in data.Products
                          where p.Active == 1
                          select p).DefaultIfEmpty();
 
-        // Check if tempProds is not null or empty
+    
         if (tempProds != null && tempProds.Any())
         {
             foreach (Product p in tempProds)
@@ -239,7 +239,7 @@ public class Service : IService
                         categoryMatches = p.Category == "Omega";
                         break;
                     default:
-                        categoryMatches = true; // Include all products if category is not specified
+                        categoryMatches = true; 
                         break;
                 }
 
@@ -280,12 +280,12 @@ public class Service : IService
                          where p.Active == 1
                          select p).DefaultIfEmpty();
 
-        // Check if tempProds is not null or empty
+       
         if (tempProds != null && tempProds.Any())
         {
             foreach (Product p in tempProds)
             {
-                // Filter products based on price range
+               
                 if (p.Price >= minPrice && p.Price <= maxPrice)
                 {
                     var AllProds = new Product
@@ -307,7 +307,7 @@ public class Service : IService
         }
         else
         {
-            return new List<Product>(); // Return an empty list instead of null
+            return new List<Product>(); 
         }
     }
 
@@ -341,6 +341,8 @@ public class Service : IService
     {
         var cartItem = data.CartItems.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
 
+        var get = (from p in data.Products where p.Id.Equals(productId)  select p).FirstOrDefault();
+
         if (cartItem != null)
         {
             cartItem.Quantity += quantity;
@@ -351,7 +353,11 @@ public class Service : IService
             {
                 UserId = userId,
                 ProductId = productId,
-                Quantity = quantity
+                Quantity = quantity,
+                Name = get.Name,
+                Price = get.Price,
+                ImageUrl = get.ImageUrl_
+
             };
             data.CartItems.InsertOnSubmit(cartItem);
         }
@@ -427,35 +433,48 @@ public class Service : IService
         return false;
     }
 
+
+
     public List<CartItem> GetCartItems(int userId)
     {
-        List<CartItem> userCartItems = new List<CartItem>();
-
-        // Fetch all cart items from the database
-        var allCartItems = data.CartItems.ToList();
-
+    
       
-        foreach (var cartItem in allCartItems)
+
+       dynamic Lists_CartItems = new List<CartItem>();
+
+       var tempCartItem = (from p in data.CartItems
+                             where p.UserId == userId
+                             select p).DefaultIfEmpty();
+
+
+        if (tempCartItem != null)
         {
-            if (cartItem.UserId == userId)
+            foreach (CartItem C in tempCartItem)
             {
-                // Create a new CartItem instance and add it to the list
-                var item = new CartItem
+                var Items = new CartItem
                 {
-                    UserId = cartItem.UserId,
-                    ProductId = cartItem.ProductId,
-                    Quantity = cartItem.Quantity,
-                  
-                    Product = cartItem.Product 
+                    Id = C.Id,
+                    UserId = C.UserId,
+                    ProductId = C.ProductId,
+                    Quantity = C.Quantity,
+                    Price = C.Price,
+                    Name = C.Name,
+                    ImageUrl = C.ImageUrl
+
                 };
 
-                userCartItems.Add(item);
+                Lists_CartItems.Add(Items);
             }
+
+            return Lists_CartItems;
+        }
+        else
+        {
+            return null;
         }
 
-        return userCartItems;
-    }
 
+    }
 
 
     public Invoice Checkout(int userId)
