@@ -19,18 +19,39 @@ public class Service : IService
         if (login != null)
         {
 
-            var User = new UserRegistration
+
+            if (login.UserType == "Manager")
             {
-                Id = login.Id,
-                FirstName = login.FirstName,
-                LastName = login.LastName,
-                Email = login.Email,
-                UserType = login.UserType,
-            
-            };
+                var Manager = new UserRegistration
+                {
+                    Id = login.Id,
+                    FirstName = login.FirstName,
+                    LastName = login.LastName,
+                    Email = login.Email,
+                    UserType = login.UserType,
 
-            return User;
+                };
 
+                return Manager;
+            }
+            else if (login.UserType == "Customer")
+            {
+                var Customer = new UserRegistration
+                {
+                    Id = login.Id,
+                    FirstName = login.FirstName,
+                    LastName = login.LastName,
+                    Email = login.Email,
+                    UserType = login.UserType,
+
+                };
+
+                return Customer;
+            }
+
+
+
+            return login;
         }
         else
         {
@@ -451,19 +472,28 @@ public class Service : IService
         {
             foreach (CartItem C in tempCartItem)
             {
-                var Items = new CartItem
+
+                if (C != null)
                 {
-                    Id = C.Id,
-                    UserId = C.UserId,
-                    ProductId = C.ProductId,
-                    Quantity = C.Quantity,
-                    Price = C.Price,
-                    Name = C.Name,
-                    ImageUrl = C.ImageUrl
+                    var Items = new CartItem
+                    {
+                        Id = C.Id,
+                        UserId = C.UserId,
+                        ProductId = C.ProductId,
+                        Quantity = C.Quantity,
+                        Price = C.Price,
+                        Name = C.Name,
+                        ImageUrl = C.ImageUrl
 
-                };
+                    };
 
-                Lists_CartItems.Add(Items);
+                    Lists_CartItems.Add(Items);
+                }
+                else
+                {
+                    return null;
+                }
+               
             }
 
             return Lists_CartItems;
@@ -494,7 +524,7 @@ public class Service : IService
 
             foreach (var item in cartItems)
             {
-                var invoiceItem = new InvoiceItem
+                var invoiceItem = new CartItem
                 {
                     Id = invoice.Id,
                     ProductId = item.ProductId,
@@ -502,7 +532,7 @@ public class Service : IService
                     Price = item.Product.Price
                 };
 
-                data.InvoiceItems.InsertOnSubmit(invoiceItem);
+                data.CartItems.InsertOnSubmit(invoiceItem);
                 data.CartItems.DeleteOnSubmit(item);
             }
 
@@ -518,4 +548,49 @@ public class Service : IService
         }
         return null;
     }
+
+
+
+    /**
+     * This is the section for Reports
+     * 
+     */
+    public int GetTotalProductsSold()
+    {
+        
+        var totalProductsSold = data.CartItems.Sum(x => x.Quantity);
+        return totalProductsSold;
+    }
+
+  
+
+
+    public int GetRegisteredUsersCountByDate(DateTime date)
+    {
+      
+        var userCount = data.UserRegistrations.Count(u => u.CreateDate.Date == date.Date);
+        return userCount;
+    }
+
+
+
+ 
+
+    public int GetTotalOrdersPlaced()
+    {
+       
+        var totalOrders = data.Invoices.Count();
+        return totalOrders;
+    }
+
+    public int GetProductsInSockCount()
+    {
+        
+        var productsOnHandCount = data.Products
+                                      .Count(p => p.Active == 1);
+        return productsOnHandCount;
+    }
+
+
+
 }

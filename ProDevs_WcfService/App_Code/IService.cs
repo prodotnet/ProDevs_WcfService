@@ -64,6 +64,22 @@ public interface IService
 	[OperationContract]
 	Invoice Checkout(int userId);
 
+
+	
+
+	[OperationContract]
+	int GetRegisteredUsersCountByDate(DateTime date);
+
+	[OperationContract]
+	int GetTotalProductsSold();
+
+
+	[OperationContract]
+	int GetTotalOrdersPlaced();
+
+
+	[OperationContract]
+	int GetProductsInSockCount();
 }
 
 
