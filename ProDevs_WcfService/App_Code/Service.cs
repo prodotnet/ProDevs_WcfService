@@ -507,6 +507,19 @@ public class Service : IService
     }
 
 
+    public decimal ApplyDiscount(decimal totalAmount)
+    {
+        decimal discount = 0;
+
+        if (totalAmount >= 200000)
+        {
+            discount = totalAmount * 0.15m;  // 15% discount
+            totalAmount -= discount;
+        }
+
+        return totalAmount;
+    }
+
     public Invoice Checkout(int userId)
     {
         var cartItems = GetCartItems(userId);
@@ -532,7 +545,7 @@ public class Service : IService
                     Price = item.Product.Price
                 };
 
-                data.CartItems.InsertOnSubmit(invoiceItem);
+
                 data.CartItems.DeleteOnSubmit(item);
             }
 
@@ -551,18 +564,52 @@ public class Service : IService
 
 
 
+
+    public Invoice GetInvoice(int invoiceId)
+    {
+        // Retrieve the invoice based on the provided invoiceId
+        var invoice = (from inv in data.Invoices
+                       where inv.Id == invoiceId
+                       select inv
+                       ).FirstOrDefault();
+
+        // If no invoice found, return null
+        if (invoice == null)
+        {
+            return null;
+        }
+
+        // Retrieve the cart items associated with the invoice
+        var cartItems = (from ci in data.CartItems
+                         where ci.Id == invoiceId
+                         select new CartItem
+                         {
+                             Id = ci.Id,
+                             ProductId = ci.ProductId,
+                             Quantity = ci.Quantity,
+                             Price = ci.Price,
+                             Name = ci.Product.Name,
+                             ImageUrl = ci.Product.ImageUrl_
+                         }).ToList();
+
+        // Assign the retrieved cart items to the invoice
+       // invoice.CartItems = cartItems;
+
+        return invoice;
+    }
+
+
+
+
     /**
      * This is the section for Reports
      * 
      */
     public int GetTotalProductsSold()
     {
-        
-        var totalProductsSold = data.CartItems.Sum(x => x.Quantity);
-        return totalProductsSold;
+        return data.CartItems.Select(c => c.ProductId).Distinct().Count();
     }
 
-  
 
 
     public int GetRegisteredUsersCountByDate(DateTime date)
@@ -591,6 +638,6 @@ public class Service : IService
         return productsOnHandCount;
     }
 
-
+ 
 
 }

@@ -65,7 +65,10 @@ public interface IService
 	Invoice Checkout(int userId);
 
 
-	
+
+	[OperationContract]
+	decimal ApplyDiscount(decimal totalAmount);
+
 
 	[OperationContract]
 	int GetRegisteredUsersCountByDate(DateTime date);
@@ -80,6 +83,8 @@ public interface IService
 
 	[OperationContract]
 	int GetProductsInSockCount();
+
+
 }
 
 
