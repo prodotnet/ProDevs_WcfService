@@ -19,33 +19,56 @@ public interface IService
 	UserRegistration Login(string email, string password);
 
 
-	[OperationContract]
-	bool AddProduct(Product product);
-
-
-	[OperationContract]
-	bool UpdateProduct(Product product);
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
 
 	[OperationContract]
 	Product GetProduct(int id);
-
 
 	[OperationContract]
 	List<Product> GetAllProducts();
 
 
+	/// <summary>
+	///  The wcf function for Sort and filter
+	/// </summary>
+	/// <param name="category"></param>
+	/// <returns></returns>
+
 	[OperationContract]
 	List<Product> GetProductsByCategory(string category);
-
-
-
 	[OperationContract]
 	List<Product> GetProductsByPriceRange(decimal minPrice, decimal maxPrice);
 
 
+
+	/// <summary>
+	///  Product Management
+	/// </summary>
+	/// <param name="product"></param>
+	/// <returns></returns>
+
+	[OperationContract]
+	bool AddProduct(Product product);
+
+	[OperationContract]
+	bool UpdateProduct(Product product);
+
 	[OperationContract]
 	bool DeleteProduct(int id);
 
+
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="userId"></param>
+	/// <param name="productId"></param>
+	/// <param name="quantity"></param>
+	/// <returns></returns>
 
 	[OperationContract]
 	bool AddToCart(int userId, int productId, int quantity);
@@ -61,15 +84,42 @@ public interface IService
 	[OperationContract]
 	List<CartItem> GetCartItems(int userId);
 
+	
+
+
+
+	/// <summary>
+	/// wcf function for Invoice
+	/// </summary>
+	/// <param name="userId"></param>
+	/// <returns></returns>
 	[OperationContract]
 	Invoice Checkout(int userId);
 
-
-
+	[OperationContract]
+	Invoice GetInvoiceDetails(int userid);
+	[OperationContract]
+	List<InvoiceItem> GetInvoiceItems(int invoiceId);
+	
+	
+	
+	
+	
 	[OperationContract]
 	decimal ApplyDiscount(decimal totalAmount);
 
 
+
+
+
+
+
+
+	/// <summary>
+	/// //The wcf function fo dashboard queries
+	/// </summary>
+	/// <param ></param>
+	/// <returns></returns>
 	[OperationContract]
 	int GetRegisteredUsersCountByDate(DateTime date);
 

@@ -292,6 +292,7 @@ public class Service : IService
 
 
 
+
     public List<Product> GetProductsByPriceRange(decimal minPrice, decimal maxPrice)
     {
         dynamic Prods = new List<Product>();
@@ -507,6 +508,10 @@ public class Service : IService
     }
 
 
+   
+
+
+
     public decimal ApplyDiscount(decimal totalAmount)
     {
         decimal discount = 0;
@@ -520,86 +525,124 @@ public class Service : IService
         return totalAmount;
     }
 
+
+ 
+    // Create a new invoice for a user
     public Invoice Checkout(int userId)
     {
-        var cartItems = GetCartItems(userId);
-
-        if (cartItems.Count > 0)
+        try
         {
-            var invoice = new Invoice
-            {
-                UserId = userId,
-                Date = DateTime.Now,
-                TotalAmount = cartItems.Sum(c => c.Product.Price * c.Quantity)
-            };
+            // Get cart items for the user
+            var cartItems = GetCartItems(userId);
 
-            data.Invoices.InsertOnSubmit(invoice);
-
-            foreach (var item in cartItems)
+            if (cartItems.Count > 0)
             {
-                var invoiceItem = new CartItem
+                // Create the invoice
+                var invoice = new Invoice
                 {
-                    Id = invoice.Id,
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    Price = item.Product.Price
+                    UserId = userId,
+                    Date = DateTime.Now,
+                    TotalAmount = cartItems.Sum(c => c.Price * c.Quantity)
                 };
 
-
-                data.CartItems.DeleteOnSubmit(item);
-            }
-
-            try
-            {
+             
+                data.Invoices.InsertOnSubmit(invoice);
                 data.SubmitChanges();
+
+              
+                foreach (var item in cartItems)
+                {
+                    var invoiceItem = new InvoiceItem
+                    {
+                        InvoiceId = invoice.Id,
+                        UserId = userId,
+                        ProductId = item.ProductId,
+                        Name = item.Name,
+                        Quantity = item.Quantity,
+                        Price = item.Price
+                    };
+
+                   
+                    data.InvoiceItems.InsertOnSubmit(invoiceItem);
+                }
+
+                // Submit changes for invoice items
+                data.SubmitChanges();
+
                 return invoice;
             }
-            catch
-            {
-                return null;
-            }
+
+            return null;
         }
-        return null;
+        catch (Exception ex)
+        {
+          
+            return null;
+        }
     }
 
 
 
-
-    public Invoice GetInvoice(int invoiceId)
+    // Retrieve invoice details based on invoice ID
+    public Invoice GetInvoiceDetails(int userId)
     {
-        // Retrieve the invoice based on the provided invoiceId
-        var invoice = (from inv in data.Invoices
-                       where inv.Id == invoiceId
-                       select inv
-                       ).FirstOrDefault();
+        
+        var getInvoice = (from i in data.Invoices
+                          where i.UserId == userId
+                          select i).FirstOrDefault();
 
-        // If no invoice found, return null
-        if (invoice == null)
+        if (getInvoice != null)
+        {
+            
+            var invoice = new Invoice
+            {
+                Id = getInvoice.Id,
+                UserId = userId,
+                Date = getInvoice.Date ,
+                TotalAmount = getInvoice.TotalAmount
+            };
+
+            return invoice; 
+        }
+        else
+        {
+            return null; 
+        }
+    }
+
+    public List<InvoiceItem> GetInvoiceItems(int invoiceId)
+    {
+        dynamic Lists_InvoiceItems = new List<InvoiceItem>();
+
+        var tempInvoiceItems = (from ii in data.InvoiceItems
+                                where ii.InvoiceId == invoiceId
+                                select ii).ToList();
+
+        if (tempInvoiceItems != null)
+        {
+            foreach (var item in tempInvoiceItems)
+            {
+                if (item != null)
+                {
+                    var invoiceItem = new InvoiceItem
+                    {
+                        
+                        Name = item.Name,
+                        Quantity = item.Quantity,
+                        Price = item.Price
+                    };
+
+                    Lists_InvoiceItems.Add(invoiceItem);
+                }
+            }
+
+            return Lists_InvoiceItems;
+        }
+        else
         {
             return null;
         }
-
-        // Retrieve the cart items associated with the invoice
-        var cartItems = (from ci in data.CartItems
-                         where ci.Id == invoiceId
-                         select new CartItem
-                         {
-                             Id = ci.Id,
-                             ProductId = ci.ProductId,
-                             Quantity = ci.Quantity,
-                             Price = ci.Price,
-                             Name = ci.Product.Name,
-                             ImageUrl = ci.Product.ImageUrl_
-                         }).ToList();
-
-        // Assign the retrieved cart items to the invoice
-       // invoice.CartItems = cartItems;
-
-        return invoice;
     }
-
-
-
 
     /**
      * This is the section for Reports
