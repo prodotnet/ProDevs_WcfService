@@ -11,11 +11,22 @@ using System.Text;
 public interface IService
 {
 
+
+	/// <summary>
+	///  Login and registeration 
+	/// </summary>
+	/// <param name="firstName"></param>
+	/// <param name="lastName"></param>
+	/// <param name="email"></param>
+	/// <param name="password"></param>
+	/// <param name="gender"></param>
+	/// <param name="userType"></param>
+	/// <param name="createDate"></param>
+	/// <returns></returns>
 	[OperationContract]
 	bool Register(string firstName, string lastName, string email, string password, string gender ,string userType, DateTime createDate);
 
 	[OperationContract]
-	
 	UserRegistration Login(string email, string password);
 
 
@@ -31,7 +42,8 @@ public interface IService
 	[OperationContract]
 	List<Product> GetAllProducts();
 
-
+	[OperationContract]
+	List<Product> GetBestSellingProducts();
 	/// <summary>
 	///  The wcf function for Sort and filter
 	/// </summary>
@@ -84,9 +96,6 @@ public interface IService
 	[OperationContract]
 	List<CartItem> GetCartItems(int userId);
 
-	
-
-
 
 	/// <summary>
 	/// wcf function for Invoice
@@ -100,20 +109,15 @@ public interface IService
 	Invoice GetInvoiceDetails(int userid);
 	[OperationContract]
 	List<InvoiceItem> GetInvoiceItems(int invoiceId);
-	
-	
-	
-	
-	
+
+	/// <summary>
+	///ADiscount
+	///
+	/// </summary>
+	/// <param name="totalAmount"></param>
+	/// <returns></returns>
 	[OperationContract]
 	decimal ApplyDiscount(decimal totalAmount);
-
-
-
-
-
-
-
 
 	/// <summary>
 	/// //The wcf function fo dashboard queries

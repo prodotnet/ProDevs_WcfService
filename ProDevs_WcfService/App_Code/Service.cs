@@ -165,7 +165,7 @@ public class Service : IService
     //Method  to get Product
     public Product GetProduct(int id)
     {
-        var get = (from p in data.Products where p.Id.Equals(id) && p.Active.Equals(1) select p).FirstOrDefault();
+        var get = (from p in data.Products where p.Id.Equals(id) select p).FirstOrDefault();
 
         if (get != null)
         {
@@ -228,7 +228,42 @@ public class Service : IService
 
     }
 
+    public List<Product> GetBestSellingProducts()
+    {
+        dynamic Prods = new List<Product>();
 
+        dynamic tempProds = (from p in data.Products
+                             where p.Active == 2
+                             select p).DefaultIfEmpty();
+
+        if (tempProds != null)
+        {
+            foreach (Product p in tempProds)
+            {
+                var AllProds = new Product
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    ImageUrl_ = p.ImageUrl_,
+                    Price = p.Price,
+                    Category = p.Category,
+                    Active = 2,
+
+                };
+
+                Prods.Add(AllProds);
+            }
+
+            return Prods;
+        }
+        else
+        {
+            return null;
+        }
+
+
+    }
 
     //method to sort by catagory by name
     public List<Product> GetProductsByCategory(string category)
@@ -516,9 +551,9 @@ public class Service : IService
     {
         decimal discount = 0;
 
-        if (totalAmount >= 200000)
+        if (totalAmount >= 300000)
         {
-            discount = totalAmount * 0.15m;  // 15% discount
+            discount = totalAmount * 0.10m;  
             totalAmount -= discount;
         }
 
@@ -526,7 +561,7 @@ public class Service : IService
     }
 
 
- 
+
     // Create a new invoice for a user
     public Invoice Checkout(int userId)
     {
@@ -537,19 +572,26 @@ public class Service : IService
 
             if (cartItems.Count > 0)
             {
-                // Create the invoice
+                
+                decimal totalAmount = cartItems.Sum(c => c.Price * c.Quantity);
+                decimal discount = ApplyDiscount(totalAmount);
+                decimal vatAmount = totalAmount * 0.15m; // 15% VAT
+                decimal deliveryFee = 50.00m; 
+                decimal finalTotal = totalAmount - discount + vatAmount + deliveryFee;
+
+               
                 var invoice = new Invoice
                 {
                     UserId = userId,
                     Date = DateTime.Now,
-                    TotalAmount = cartItems.Sum(c => c.Price * c.Quantity)
+                    TotalAmount = finalTotal 
                 };
 
-             
+               
                 data.Invoices.InsertOnSubmit(invoice);
                 data.SubmitChanges();
 
-              
+                // Create and insert invoice items
                 foreach (var item in cartItems)
                 {
                     var invoiceItem = new InvoiceItem
@@ -562,33 +604,46 @@ public class Service : IService
                         Price = item.Price
                     };
 
-                   
                     data.InvoiceItems.InsertOnSubmit(invoiceItem);
                 }
 
                 // Submit changes for invoice items
                 data.SubmitChanges();
 
-                return invoice;
+               
+                ClearCart(userId);
+
+                return invoice; 
             }
 
-            return null;
+            return null; 
         }
         catch (Exception ex)
         {
-          
+            
             return null;
         }
     }
 
+   
+    private void ClearCart(int userId)
+    {
+        var cartItems = (from c in data.CartItems
+                         where c.UserId == userId
+                         select c).ToList();
+
+        data.CartItems.DeleteAllOnSubmit(cartItems);
+        data.SubmitChanges();
+    }
 
 
     // Retrieve invoice details based on invoice ID
     public Invoice GetInvoiceDetails(int userId)
     {
-        
+
         var getInvoice = (from i in data.Invoices
                           where i.UserId == userId
+                          orderby i.Date descending 
                           select i).FirstOrDefault();
 
         if (getInvoice != null)
